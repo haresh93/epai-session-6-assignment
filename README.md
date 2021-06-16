@@ -1,3 +1,6 @@
+# EPAI Session 6 Poker Assignment
+
+
 ## test_check_for_royal_flush
 the cards should be in  highest value viz. 10, J, Q, K, A  and of the ame suite viz. spades, clubs, diamond and hearts. 
 
@@ -6,10 +9,8 @@ the cards should be in  highest value viz. 10, J, Q, K, A  and of the ame suite 
 Also tests if the four cards are of different suite
 #test_check_for_straight_flush()
 
-## this function tests whether the cards given are in a straight and of the same suite and returns as passed. 
-#test_check_for_straight_flush_negative()
-
-
+# test_check_for_straight_flush_negative()
+Function Tests 
 
 ## Testing Straight Flush
 This functions tests if the cards are in sequence 2 - 6 and of spades  
@@ -30,3 +31,33 @@ This function also tests if the cards are not in a seqnece not in the sequence a
 
 ## test_check_for_four_of_a_kind
 four cards tken of the same kind and randomized fifth card to check the status . 
+
+
+## Utility functions
+
+check_for_royal_flush
+check_for_straight_flush
+check_for_four_of_a_kind
+check_for_full_house
+check_for_flush
+check_for_straight
+check_for_three_of_a_kind
+check_for_two_pair
+check_for_pair
+
+All the tests with random scenarios have been written to check if the above utility functions are working as expected or not with negative test cases too.
+
+## get_high_card_value
+
+Return the value of the high card in the cards sent
+
+## get_result_of_the_poker
+
+This function returns the player who won the game of poker based on the cards passed to the function
+Each Player's cards are checked if the cards have any of the rank according to the order
+If the Player A rank is less than Player B then Player A has won it
+If the Player B rank is less than Player B then Player B has won it
+
+If both the Player A rank and Player B rank are same then `resolve_rank_tie` is called and the tie is resolved, 
+based on the poker hand the involved high card is calculated and who ever has a high card in the poker hand is the
+winner of the game.
