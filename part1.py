@@ -105,7 +105,7 @@ def check_for_royal_flush(player_cards: "Set of 3 or 4 or 5 cards") -> bool:
     Checks if the player_cards contains 5 cards and a royal flush
     Example
     10 jack queen king ace 
-    The Hightest sequence cards all of same suit - spades, clubs, hearts or diamonds
+    The Highest sequence cards all of same suit - spades, clubs, hearts or diamonds
 
     Returns True if it finds in player_cards else Returns False
     """
@@ -265,6 +265,7 @@ def get_high_card_value(player_cards: "Set of 3 or 4 or 5 cards") -> int:
     Example
     (10, spades), (5, clubs), (7, hearts), (3, clubs), (2, diamonds) -> Returns 10
     """
+    print(player_cards)
     if not len(player_cards):
         return None
     if validate_cards(player_cards):
@@ -273,11 +274,19 @@ def get_high_card_value(player_cards: "Set of 3 or 4 or 5 cards") -> int:
         return max(set(map(lambda x: x[0], sorted_cards)))
 
 def resolve_by_high_card(player_a_cards: "Set of 3 or 4 or 5 cards", player_b_cards: "Set of 3 or 4 or 5 cards"):
+    """
+    This function takes player_a_cards and player_b_cards and checks recursively the high card from player a and high card from player B
+    and till it gets a result, if it is not able to get a result it returns "Player A and Player B"
+    """
     player_a_high_card = get_high_card_value(player_a_cards)
     player_b_high_card = get_high_card_value(player_b_cards)
+    tmp_a_cards = player_a_cards
+    tmp_b_cards = player_b_cards 
     while player_a_high_card is not None and player_b_high_card is not None and player_a_high_card == player_b_high_card:
-        player_a_high_card = get_high_card_value({val for val in player_a_cards if val[0] != vals[player_a_high_card]})
-        player_b_high_card = get_high_card_value({val for val in player_b_cards if val[0] != vals[player_b_high_card]})
+        tmp_a_cards = {val for val in tmp_a_cards if val[0] != vals[player_a_high_card - 2]}
+        tmp_b_cards = {val for val in tmp_b_cards if val[0] != vals[player_b_high_card - 2]}
+        player_a_high_card = get_high_card_value(tmp_a_cards)
+        player_b_high_card = get_high_card_value(tmp_b_cards)
 
     if player_a_high_card is not None and player_b_high_card is not None:
         return "Player A" if player_a_high_card > player_b_high_card else "Player B"
@@ -288,7 +297,12 @@ def resolve_with_preferential_high_card_value(
     player_a_cards: "Set of 3 or 4 or 5 cards of Player A",
     player_b_cards: "Set of 3 or 4 or 5 cards of player B",
     count: "Preferential High card count"):
+    """
+    This function takes player_a_cards and player_b_cards and the preferential count
+    It resolves the tie by checking the high card value by giving preference to the card which is repeated count times.
 
+    Comparing with the card with count times is also resulting in a tie then we resolve it with a high from the rest of the cards
+    """
     player_a_values_list = list(map(lambda x: x[0], sorted(convert_cards_to_values(player_a_cards))))
     player_b_values_list = list(map(lambda x: x[0], sorted(convert_cards_to_values(player_b_cards))))
     player_a_values_set = set(player_a_values_list)
@@ -303,42 +317,55 @@ def resolve_with_preferential_high_card_value(
     for val in player_b_values_set:
         if player_b_values_list.count(val) == count:
             player_b_cards_to_compare.append(val)
+    print(player_a_cards_to_compare)
+    print(player_b_cards_to_compare)
     player_a_card_to_compare = max(player_a_cards_to_compare)
     player_b_card_to_compare = max(player_b_cards_to_compare)
-
     if player_a_card_to_compare > player_b_card_to_compare:
         return "Player A"
-    elif player_b_card_to_compare < player_a_card_to_compare:
+    elif player_b_card_to_compare > player_a_card_to_compare:
         return "Player B"
     else:
-        resolve_by_high_card(
-            [val for val in player_a_cards if card_dict[val[0]] not in player_a_cards_to_compare], 
-            [val for val in player_b_cards if card_dict[val[0]] not in player_b_cards_to_compare])
+        return resolve_by_high_card(
+            {val for val in player_a_cards if card_dict[val[0]] not in player_a_cards_to_compare}, 
+            {val for val in player_b_cards if card_dict[val[0]] not in player_b_cards_to_compare})
 
 def resolve_rank_tie(
     poker_hand: "The Poker hand which both the players have",
     player_a_cards: "Set of 3 or 4 or 5 cards of Player A",
     player_b_cards: "Set of 3 or 4 or 5 cards of player B") -> str:
-
+    """
+    This is function is called when the rank of the Player A and Player B is same, 
+    then based on the poker_hand that is passed to the function 
+    
+    if it is Straight Flush or Flush or Straight Then resolve_by_high_card is called and the result is returned
+    
+    if it is Four Of a Kind then resolve_with_preferential_high_card_value is called with both the player cards and 4 as the count
+    
+    if it is Full House or Three Of a Kind then resolve_with_preferential_high_card_value is called with bothe the player cards and 3 as the count
+    
+    if it is a Pair or Two Pair then resolve_with_preferential_high_card_value is called with both the player_cards and 2 as the count
+    """
     if poker_hand == "Straight Flush" or poker_hand == "Flush" or poker_hand == "Straight":
         return resolve_by_high_card(player_a_cards, player_b_cards)
     elif poker_hand == "Four of a Kind":
         return resolve_with_preferential_high_card_value(player_a_cards, player_b_cards, 4)
     elif poker_hand == "Full House" or poker_hand == "Three Of a Kind":
         return resolve_with_preferential_high_card_value(player_a_cards, player_b_cards, 3)
-    elif poker_hand == "Pair" and poker_hand == "Two Pair":
+    elif poker_hand == "Pair" or poker_hand == "Two Pair":
         return resolve_with_preferential_high_card_value(player_a_cards, player_b_cards, 2)
+    else:
+        return "Player A and Player B"
 
 def get_result_of_poker(player_a_cards: "Set of 3 or 4 or 5 cards of player A", player_b_cards: "Set of 3 or 4 or 5 cards of player B") -> str:
     """
     This function returns the player who won the game of poker based on the cards passed to the function
     Each Player's cards are checked if the cards have any of the rank according to the order
-    If the Player A rank is less than Player B then Player A has won it
-    If the Player B rank is less than Player B then Player B has won it
+    If the Player A rank is less than Player B then Player A is returned
+    If the Player B rank is less than Player B then Player B is returned
 
     If both the Player A rank and Player B rank are same then 
-    based on the poker hand the involved high card is calculated and who ever has a high card in the poker hand is the
-    winner of the game.
+    resolve_rank_tie function is called and the result returned by it is returned
     """
 
     if validate_cards(player_a_cards) and validate_cards(player_b_cards):
@@ -382,13 +409,4 @@ def get_result_of_poker(player_a_cards: "Set of 3 or 4 or 5 cards of player A", 
             return "Player B"
         else:
             # Player A and Player B do not have any special poker hand
-            player_a_high_card = get_high_card_value(player_a_cards)
-            player_b_high_card = get_high_card_value(player_b_cards)
-            if player_a_high_card > player_b_high_card:
-                print("Player A has a higher card than Player B")
-                print("Player A has won the game.")
-                return "Player A"
-            else:
-                print("Player B has a higher card than Player A")
-                print("Player B has won the game")
-                return "Player B"
+            return resolve_by_high_card(player_a_cards, player_b_cards)
